@@ -1,0 +1,16 @@
+{
+  "id": "dsh-external/dsh-git-remotes",
+  "version": "0.1.0",
+  "main": "./lib/index.js",
+  "description": "better-sidebar Git Remotes tab: fetch / ff-only pull / confirmed push. Does not replace the built-in Git tab.",
+  "engines": {
+    "dsh": ">=0.0.1"
+  },
+  "contributes": {
+    "tools": [],
+    "skills": []
+  },
+  "client": {
+    "main": "./lib/client-registry.js"
+  }
+}

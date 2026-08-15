@@ -1,0 +1,147 @@
+/*
+ * Colors come from the DSH design platform (`--dsw-alias-*` on <body>).
+ */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 10px;
+  height: 100%;
+  overflow-y: auto;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+}
+
+.empty {
+  color: var(--dsw-alias-label-dimmed);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: baseline;
+}
+
+.branch {
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--dsw-alias-label-secondary);
+}
+
+.counts {
+  font-variant-numeric: tabular-nums;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.gone {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.remoteList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.remoteItem {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-2);
+  cursor: pointer;
+}
+
+.remoteItemActive {
+  border-color: var(--dsw-alias-state-business-primary);
+}
+
+.remoteName {
+  font-weight: 600;
+  flex: none;
+}
+
+.remoteUrl {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.button {
+  appearance: none;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.primary {
+  border-color: var(--dsw-alias-state-business-primary);
+  background: var(--dsw-alias-button-info-fill);
+  color: #fff;
+}
+
+.danger {
+  border-color: var(--dsw-alias-state-error-primary);
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-3);
+}
+
+.prune {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+}
+
+.error {
+  color: var(--dsw-alias-state-error-primary);
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.ok {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+}

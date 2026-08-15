@@ -1,0 +1,6 @@
+# pnpm 11+: project settings live here (not package.json#pnpm / .npmrc).
+autoInstallPeers: false
+strictPeerDependencies: false
+ignoredBuiltDependencies:
+  - node-pty
+  - protobufjs

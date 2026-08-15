@@ -1,0 +1,10 @@
+# dsh-git-remotes bundle patch
+#
+# Installed with:
+#   dsh plugin --profile <name> add <path-or-git-url>
+#
+# The client half injects `betterSidebar`. Without dsh-better-sidebar the
+# host routes still mount; the tab stays inactive.
+- insert:
+    - id: git-remotes
+      name: 'dsh-git-remotes'
