@@ -16,8 +16,8 @@ The built-in Git tab already stages, commits, and discards. This plugin does **n
 Install better-sidebar first, then this plugin on the official web profile:
 
 ```sh
-dsh plugin --profile web add <path-to-dsh-better-sidebar>
-dsh plugin --profile web add <path-to-dsh-git-remotes>
+dsh plugin --profile web add dsh-better-sidebar
+dsh plugin --profile web add git+https://github.com/yq04/dsh-git-remotes.git
 ```
 
 Without better-sidebar the host routes still mount; the client declares `inject = ['betterSidebar']` so the tab stays inactive. Remove with:
@@ -49,7 +49,7 @@ pnpm test
 pnpm build
 ```
 
-`dsh.bundle.patch` is `cordis.patch.yml`. Suggested GitHub topics: `dsh-plugin`, `dsh-better-sidebar`.
+`dsh.bundle.patch` is `cordis.patch.yml`. GitHub topics already set: `dsh`, `dsh-plugin`, `dsh-better-sidebar`, `git`.
 
 ## License
 

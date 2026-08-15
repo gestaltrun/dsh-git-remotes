@@ -16,8 +16,8 @@ DeepSeek Harness **Web** 插件：在 [dsh-better-sidebar](https://github.com/om
 先装 better-sidebar，再装本插件（官方 web profile）：
 
 ```sh
-dsh plugin --profile web add <path-to-dsh-better-sidebar>
-dsh plugin --profile web add <path-to-dsh-git-remotes>
+dsh plugin --profile web add dsh-better-sidebar
+dsh plugin --profile web add git+https://github.com/yq04/dsh-git-remotes.git
 ```
 
 没有 better-sidebar 时，host 路由仍会挂上，客户端 `inject = ['betterSidebar']`，Tab **不会出现**。卸载：
@@ -51,7 +51,7 @@ pnpm build
 
 `dsh.bundle.patch` 在 `cordis.patch.yml`。发布前 `pnpm build`（npm `prepare` 会跑 tsdown）。
 
-建议 GitHub topics：`dsh-plugin`、`dsh-better-sidebar`。
+仓库已打 GitHub topics：`dsh`、`dsh-plugin`、`dsh-better-sidebar`、`git`。
 
 ## 许可
 
