@@ -5,6 +5,20 @@
   "type": "module",
   "license": "BSD-3-Clause",
   "packageManager": "pnpm@11.7.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yq04/dsh-git-remotes.git"
+  },
+  "homepage": "https://github.com/yq04/dsh-git-remotes",
+  "bugs": {
+    "url": "https://github.com/yq04/dsh-git-remotes/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "dsh-better-sidebar",
+    "git"
+  ],
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
   "exports": {
