@@ -3,7 +3,9 @@
  * Mirrors dsh-git-status / better-sidebar so locale and injection stay out.
  */
 import { spawn } from 'node:child_process'
-import { resolve } from 'node:path'
+import { isAbsolute } from 'node:path'
+import type { SessionId } from '@deepseek-ai/dsh-session'
+import { GitRemotesError } from './wire.ts'
 import { classifyFetchFailure, classifyPullFailure, classifyPushFailure } from './classify.ts'
 import type { Context } from './context-types.ts'
 import { parseStatusSb } from './parse-status.ts'
@@ -77,25 +79,14 @@ export function runGit(root: string, args: readonly string[], timeoutMs = GIT_TI
   })
 }
 
-export function workspaceRoot(ctx: Context, sessionId: string): string {
-  if (sessionId !== '') {
-    try {
-      const cwd = ctx.sessions?.get?.(sessionId)?.header?.cwd
-      if (typeof cwd === 'string' && cwd !== '') return resolvedWorkspaceRoot(cwd)
-    } catch {
-      // fall through
-    }
-  }
-  try {
-    const list = ctx.workspaceRegistry?.list?.() ?? []
-    const first = list[0]
-    if (first !== undefined && typeof first.path === 'string' && first.path !== '') {
-      return resolvedWorkspaceRoot(first.path)
-    }
-  } catch {
-    // fall through
-  }
-  return resolve(process.cwd())
+/** Resolve only a known session's authoritative workspace; remote actions never use the host cwd. */
+export async function workspaceRoot(ctx: Context, sessionId: string): Promise<string> {
+  if (sessionId === '') throw new GitRemotesError('bad-request', 'session is required')
+  const id = sessionId as SessionId
+  const header = ctx.sessions.get(id)?.header ?? (await ctx.sessionPersistence.stat(id))?.header
+  if (header === undefined) throw new GitRemotesError('not-found', 'unknown session', 404)
+  if (header.cwd === undefined || !isAbsolute(header.cwd)) throw new GitRemotesError('bad-request', 'session has no absolute workspace')
+  return resolvedWorkspaceRoot(header.cwd)
 }
 
 export async function gitIsRepo(root: string): Promise<boolean> {

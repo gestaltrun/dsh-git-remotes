@@ -8,7 +8,7 @@ export function runGit(root: string, args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
     const child = spawn('git', ['-C', root, '--no-pager', '-c', 'color.ui=false', ...args], {
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, GIT_OPTIONAL_LOCKS: '0', LC_ALL: 'C', LANG: 'C' },
+      env: { ...process.env, GIT_OPTIONAL_LOCKS: '0', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '', GIT_ALLOW_PROTOCOL: 'file', GIT_TERMINAL_PROMPT: '0', LC_ALL: 'C', LANG: 'C' },
     })
     let stdout = ''
     let stderr = ''

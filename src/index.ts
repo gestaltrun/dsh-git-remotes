@@ -4,6 +4,7 @@
  * confirm in the sidebar tab (same idea as Claude Code `/commit-push-pr`:
  * a person starts the push; the agent does not).
  */
+import type { IncomingMessage } from 'node:http'
 import type { Context } from './context-types.ts'
 import {
   gitFetchAction,
@@ -26,7 +27,7 @@ import {
 } from './wire.ts'
 
 export { name } from './identity.ts'
-export const inject = ['webServer', 'sessions', 'loader']
+export const inject = ['webServer', 'sessions', 'sessionPersistence', 'webRuntime', 'connection']
 
 export const API_PREFIX = '/git-remotes/api'
 
@@ -50,23 +51,13 @@ export { redactRemoteUrl } from './redact.ts'
 export { validateRemoteName } from './remote-name.ts'
 export { isLoopbackHostname, isTrustedApiRequest } from './trust-fence.ts'
 
-function trustedHostsOf(ctx: Context): string[] {
-  for (const entry of ctx.loader.entries()) {
-    if (entry.options.name === 'connection') {
-      const config = entry.options.config
-      return config?.trustedHosts ?? []
-    }
-  }
-  return []
-}
-
 async function withRepo<T>(
   ctx: Context,
   payload: unknown,
   fn: (root: string) => Promise<T>,
 ): Promise<T> {
   const sessionId = optionalString(payload, 'session')
-  const root = workspaceRoot(ctx, sessionId)
+  const root = await workspaceRoot(ctx, sessionId)
   if (!(await gitIsRepo(root))) {
     throw new GitRemotesError('bad-request', 'not a git repository', 400)
   }
@@ -87,7 +78,7 @@ function buildApi(): Record<string, ApiMethod> {
   return {
     status: async (ctx, payload) => {
       const sessionId = optionalString(payload, 'session')
-      const root = workspaceRoot(ctx, sessionId)
+      const root = await workspaceRoot(ctx, sessionId)
       return gitRemoteStatus(root)
     },
     fetch: async (ctx, payload) => {
@@ -129,8 +120,14 @@ export function apply(ctx: Context): void {
     kind: 'prefix',
     path: API_PREFIX,
     handler: async (req, res) => {
-      if (!isTrustedApiRequest(req, trustedHostsOf(ctx))) {
+      if (!isTrustedApiRequest(req, ctx.webRuntime.trustedHosts)) {
         writeJson(res, 403, { ok: false, error: { code: 'forbidden', message: 'forbidden' } })
+        return
+      }
+      const privateHttp = ctx.get('desktopPrivateHttp') as { isTrusted(request: IncomingMessage): boolean } | undefined
+      const rejection = privateHttp?.isTrusted(req) === true ? undefined : ctx.connection.requestRejection(req)
+      if (rejection !== undefined) {
+        writeJson(res, rejection, { ok: false, error: { code: 'forbidden', message: rejection === 401 ? 'unauthorized' : 'forbidden' } })
         return
       }
       try {

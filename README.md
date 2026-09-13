@@ -1,8 +1,10 @@
-# dsh-git-remotes
+# @gestaltrun/dsh-git-remotes
+
+基于 [yq04/dsh-git-remotes](https://github.com/yq04/dsh-git-remotes/tree/a9f1729b96e42e38555ddf6042482df8d220453b)，发行包 `0.1.0-gestaltrun.0` 适配 DSH `0.1.5-rc.2` 与 `@gestaltrun/dsh-better-sidebar@0.19.1-gestaltrun.0`。Desktop/Web 共用正式 `betterSidebar` 入口。Host 需要 `webServer`、`webRuntime`、`sessions`、`sessionPersistence`、`connection`；Git 工作目录只来自已知会话的持久或实时 header，未知会话不执行 Git。没有模型工具、preset 或创意工坊依赖。
 
 [**English**](README_EN.md) · **简体中文**
 
-DeepSeek Harness **Web** 插件：在 [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar) 里增加一个 **Git 远程** Tab。
+DeepSeek Harness **Web** 插件：在 [dsh-better-sidebar](https://github.com/gestaltrun/better-sidebar) 里增加一个 **Git 远程** Tab。
 
 内置 Git Tab 负责暂存 / 提交 / 丢弃。本插件**不替换**它，只补它没有的远程动作：
 
@@ -16,14 +18,14 @@ DeepSeek Harness **Web** 插件：在 [dsh-better-sidebar](https://github.com/om
 先装 better-sidebar，再装本插件（官方 web profile）：
 
 ```sh
-dsh plugin --profile web add dsh-better-sidebar
-dsh plugin --profile web add git+https://github.com/yq04/dsh-git-remotes.git
+dsh plugin --profile web add @gestaltrun/dsh-better-sidebar@0.19.1-gestaltrun.0
+dsh plugin --profile web add @gestaltrun/dsh-git-remotes@candidate
 ```
 
 没有 better-sidebar 时，host 路由仍会挂上，客户端 `inject = ['betterSidebar']`，Tab **不会出现**。卸载：
 
 ```sh
-dsh plugin --profile web remove dsh-git-remotes
+dsh plugin --profile web remove @gestaltrun/dsh-git-remotes
 dsh plugin --profile web --dump-config
 ```
 

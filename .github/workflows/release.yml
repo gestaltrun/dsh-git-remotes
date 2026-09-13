@@ -1,0 +1,39 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish this candidate package
+        type: boolean
+        default: false
+  release:
+    types: [published]
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  publish:
+    if: github.repository == 'gestaltrun/dsh-git-remotes'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.8.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Build candidate or explicitly publish
+        env:
+          PUBLISH_PACKAGE: ${{ inputs.publish }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = release ] || [ "$PUBLISH_PACKAGE" = true ]; then
+            pnpm run release:publish -- --out "${{ runner.temp }}/plugin-release"
+          else
+            pnpm run release:pack -- --out "${{ runner.temp }}/plugin-release"
+          fi

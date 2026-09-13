@@ -1,8 +1,10 @@
-# dsh-git-remotes
+# @gestaltrun/dsh-git-remotes
+
+Based on [yq04/dsh-git-remotes](https://github.com/yq04/dsh-git-remotes/tree/a9f1729b96e42e38555ddf6042482df8d220453b). Version `0.1.0-gestaltrun.0` targets DSH `0.1.5-rc.2` and `@gestaltrun/dsh-better-sidebar@0.19.1-gestaltrun.0`. Desktop and Web share the formal sidebar entry. The Host requires `webServer`, `webRuntime`, `sessions` and `sessionPersistence` and `connection`. Git uses only a known session header workspace; unknown sessions never execute Git. No model tool, preset or marketplace dependency.
 
 [**简体中文**](README.md) · **English**
 
-A DeepSeek Harness **web** plugin that adds a **Git Remotes** tab to [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar).
+A DeepSeek Harness **web** plugin that adds a **Git Remotes** tab to [dsh-better-sidebar](https://github.com/gestaltrun/better-sidebar).
 
 The built-in Git tab already stages, commits, and discards. This plugin does **not** replace it. It fills the remote gap:
 
@@ -16,14 +18,14 @@ The built-in Git tab already stages, commits, and discards. This plugin does **n
 Install better-sidebar first, then this plugin on the official web profile:
 
 ```sh
-dsh plugin --profile web add dsh-better-sidebar
-dsh plugin --profile web add git+https://github.com/yq04/dsh-git-remotes.git
+dsh plugin --profile web add @gestaltrun/dsh-better-sidebar@0.19.1-gestaltrun.0
+dsh plugin --profile web add @gestaltrun/dsh-git-remotes@candidate
 ```
 
 Without better-sidebar the host routes still mount; the client declares `inject = ['betterSidebar']` so the tab stays inactive. Remove with:
 
 ```sh
-dsh plugin --profile web remove dsh-git-remotes
+dsh plugin --profile web remove @gestaltrun/dsh-git-remotes
 dsh plugin --profile web --dump-config
 ```
 

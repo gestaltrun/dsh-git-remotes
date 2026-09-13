@@ -29,6 +29,6 @@ export function apply(ctx: Context): void {
     icon: (size: number) => RemotesIcon(size),
     order: 25,
     single: true,
-    component: (props) => <RemotesPanel {...props} />,
+    component: (props) => <RemotesPanel key={props.scope.sessionId} {...props} />,
   }), 'dsh-git-remotes: register sidebar tab')
 }

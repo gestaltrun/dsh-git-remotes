@@ -3,7 +3,7 @@
  * fetch (optional prune), ff-only pull, and a two-step confirmed push.
  * Does not stage, commit, or force-push — those stay in better-sidebar Git.
  */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { GitRemotesTabComponentProps } from '../context-types.ts'
 import { GitRemotesApiError, gitRemotesApi, messageForError, type RemoteStatus } from './api.ts'
 import css from './remotes-panel.module.css'
@@ -12,6 +12,12 @@ type Busy = 'idle' | 'status' | 'fetch' | 'pull' | 'push'
 
 export function RemotesPanel(props: GitRemotesTabComponentProps) {
   const sessionId = props.scope.sessionId
+  const lifetime = useRef<AbortController | null>(null)
+  useEffect(() => {
+    const controller = new AbortController()
+    lifetime.current = controller
+    return () => controller.abort()
+  }, [])
   const [status, setStatus] = useState<RemoteStatus | null>(null)
   const [remote, setRemote] = useState('')
   const [prune, setPrune] = useState(true)
@@ -24,7 +30,8 @@ export function RemotesPanel(props: GitRemotesTabComponentProps) {
     setBusy('status')
     setError(null)
     try {
-      const next = await gitRemotesApi.status(sessionId)
+      const next = await gitRemotesApi.status(sessionId, lifetime.current?.signal)
+      if (lifetime.current?.signal.aborted) return
       setStatus(next)
       setRemote((current) => {
         if (current === '') return ''
@@ -32,9 +39,10 @@ export function RemotesPanel(props: GitRemotesTabComponentProps) {
         return ''
       })
     } catch (caught) {
+      if (lifetime.current?.signal.aborted) return
       setError(caught instanceof GitRemotesApiError ? messageForError(caught) : String(caught))
     } finally {
-      setBusy('idle')
+      if (!lifetime.current?.signal.aborted) setBusy('idle')
     }
   }, [sessionId])
 
@@ -50,12 +58,14 @@ export function RemotesPanel(props: GitRemotesTabComponentProps) {
     setConfirmPush(false)
     try {
       await work()
+      if (lifetime.current?.signal.aborted) return
       setOk(success)
       await refresh()
     } catch (caught) {
+      if (lifetime.current?.signal.aborted) return
       setError(caught instanceof GitRemotesApiError ? messageForError(caught) : String(caught))
     } finally {
-      setBusy('idle')
+      if (!lifetime.current?.signal.aborted) setBusy('idle')
     }
   }
 
@@ -139,7 +149,7 @@ export function RemotesPanel(props: GitRemotesTabComponentProps) {
           type="button"
           className={css.button}
           disabled={disabled}
-          onClick={() => void run('fetch', () => gitRemotesApi.fetch(sessionId, remote, prune), `已 fetch ${target}`)}
+          onClick={() => void run('fetch', () => gitRemotesApi.fetch(sessionId, remote, prune, lifetime.current?.signal), `已 fetch ${target}`)}
         >
           Fetch{prune ? ' + prune' : ''}
         </button>
@@ -147,7 +157,7 @@ export function RemotesPanel(props: GitRemotesTabComponentProps) {
           type="button"
           className={css.button}
           disabled={disabled}
-          onClick={() => void run('pull', () => gitRemotesApi.pull(sessionId, remote), '已快进 pull')}
+          onClick={() => void run('pull', () => gitRemotesApi.pull(sessionId, remote, lifetime.current?.signal), '已快进 pull')}
         >
           Pull --ff-only
         </button>
@@ -172,7 +182,7 @@ export function RemotesPanel(props: GitRemotesTabComponentProps) {
               type="button"
               className={`${css.button} ${css.primary}`}
               disabled={disabled}
-              onClick={() => void run('push', () => gitRemotesApi.push(sessionId, remote), '已推送')}
+              onClick={() => void run('push', () => gitRemotesApi.push(sessionId, remote, lifetime.current?.signal), '已推送')}
             >
               确认推送
             </button>

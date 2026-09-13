@@ -8,7 +8,7 @@ describe('plugin export shape', () => {
   it('is a namespace plugin (no default export)', () => {
     expect('default' in plugin).toBe(false)
     expect(plugin.name).toBe('dsh-git-remotes')
-    expect(plugin.inject).toEqual(['webServer', 'sessions', 'loader'])
+    expect(plugin.inject).toEqual(['webServer', 'sessions', 'sessionPersistence', 'webRuntime', 'connection'])
     expect(typeof plugin.apply).toBe('function')
   })
 

@@ -25,7 +25,7 @@ const CLIENT_EXTERNALS = [
   'react/jsx-runtime',
   'react-dom',
   'react-dom/client',
-  'cordis',
+  '@deepseek-ai/cordis',
 ]
 
 const CSS_VIRTUAL_PREFIX = '\0dsh-css:'
@@ -128,12 +128,13 @@ function makeCssPlugin(pluginId: string): BuildPlugin {
       if (fileId.endsWith('.module.css')) {
         const { code, exports: cssExports } = transform({
           filename: fileId,
+          projectRoot: REPOSITORY_ROOT,
           code: source,
           cssModules: { pattern: `[hash]_[local]` },
           minify: true,
         })
         const classMap: Record<string, string> = {}
-        for (const [local, exp] of Object.entries(cssExports ?? {})) classMap[local] = exp.name
+        for (const [local, exp] of Object.entries(cssExports ?? {}).sort(([a], [b]) => a.localeCompare(b))) classMap[local] = exp.name
         return [
           injectTag(pluginId, fileId, code.toString()),
           `export default ${JSON.stringify(classMap)};`,
@@ -158,6 +159,6 @@ export default [
     dts: false,
     clean: false,
   },
-  clientBundle('dsh-git-remotes', 'client.js'),
-  clientBundle('dsh-external/dsh-git-remotes', 'client-registry.js'),
+  clientBundle('@gestaltrun/dsh-git-remotes', 'client.js'),
+  clientBundle('@gestaltrun/dsh-git-remotes', 'client-registry.js'),
 ] satisfies UserConfig[]

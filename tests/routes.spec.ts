@@ -7,12 +7,14 @@ import { apply, API_PREFIX } from '../src/index.ts'
 import type { Context } from '../src/context-types.ts'
 import { makeRemote, makeRepo, runGit } from './fixtures/repo.ts'
 
-function fakeCtx(root: string) {
+function fakeCtx(root: string, rejection?: 401 | 403, privateRequest?: unknown) {
   const routes: Array<{ path: string; handler: (req: unknown, res: unknown) => Promise<void> }> = []
   const ctx = {
-    sessions: { get: () => undefined },
-    workspaceRegistry: { list: () => [{ path: root }] },
-    loader: { entries: () => [] },
+    sessions: { get: (id: string) => id === 'test-session' ? { header: { cwd: root } } : undefined },
+    sessionPersistence: { stat: async () => undefined },
+    webRuntime: { trustedHosts: [] },
+    connection: { requestRejection: () => rejection },
+    get: (name: string) => name === 'desktopPrivateHttp' ? { isTrusted: (request: unknown) => request === privateRequest } : undefined,
     webServer: {
       register: (route: { path: string; handler: (req: unknown, res: unknown) => Promise<void> }) => {
         routes.push(route)
@@ -48,7 +50,7 @@ function fakeReq({
     headers,
     url,
     async *[Symbol.asyncIterator]() {
-      yield body
+      yield JSON.stringify({ session: 'test-session', ...JSON.parse(body) })
     },
   }
 }
@@ -63,6 +65,27 @@ function fakeRes() {
 }
 
 describe('git-remotes routes', () => {
+  it('rejects an unauthenticated loopback request despite a forged cookie name', async () => {
+    const repo = await makeRepo()
+    const res = fakeRes()
+    const req = fakeReq({ url: `${API_PREFIX}/status` })
+    req.headers.cookie = 'dsh-auth-forged=anything'
+    await fakeCtx(repo.root, 401).handler?.(req, res)
+    expect(res.status).toBe(401)
+  })
+
+  it('accepts only the private carrier request recognized by the owning host', async () => {
+    const repo = await makeRepo()
+    const privateRequest = fakeReq({ url: `${API_PREFIX}/status` })
+    const handler = fakeCtx(repo.root, 401, privateRequest).handler
+    const allowed = fakeRes()
+    await handler?.(privateRequest, allowed)
+    expect(allowed.status).toBe(200)
+    const rejected = fakeRes()
+    await handler?.(fakeReq({ url: `${API_PREFIX}/status` }), rejected)
+    expect(rejected.status).toBe(401)
+  })
+
   it('GET is 405', async () => {
     const repo = await makeRepo()
     await repo.commit('c1')

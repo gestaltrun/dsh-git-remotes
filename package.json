@@ -1,17 +1,17 @@
 {
-  "name": "dsh-git-remotes",
-  "version": "0.1.0",
+  "name": "@gestaltrun/dsh-git-remotes",
+  "version": "0.1.0-gestaltrun.0",
   "description": "DSH web plugin: better-sidebar Git Remotes tab for fetch / ff-only pull / confirmed push. Does not replace the built-in Git stage/commit tab.",
   "type": "module",
   "license": "BSD-3-Clause",
-  "packageManager": "pnpm@11.7.0",
+  "packageManager": "pnpm@11.8.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yq04/dsh-git-remotes.git"
+    "url": "https://github.com/gestaltrun/dsh-git-remotes"
   },
-  "homepage": "https://github.com/yq04/dsh-git-remotes",
+  "homepage": "https://github.com/gestaltrun/dsh-git-remotes",
   "bugs": {
-    "url": "https://github.com/yq04/dsh-git-remotes/issues"
+    "url": "https://github.com/gestaltrun/dsh-git-remotes/issues"
   },
   "keywords": [
     "dsh",
@@ -34,7 +34,7 @@
     "./package.json": "./package.json"
   },
   "engines": {
-    "node": ">=20"
+    "node": "^22.19.0 || >=24.0.0"
   },
   "dsh": {
     "bundle": {
@@ -42,7 +42,7 @@
     },
     "client": {
       "inject": [
-        "@deepseek-ai/dsh-client-runtime"
+        "@gestaltrun/dsh-better-sidebar"
       ],
       "platform": "web"
     }
@@ -57,37 +57,53 @@
     "dsh.plugin.json",
     "README.md",
     "README_EN.md",
-    "LICENSE"
+    "LICENSE",
+    "scripts/gestaltrun-release.mjs"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json && tsdown",
-    "prepublishOnly": "pnpm build",
     "typecheck": "tsc --noEmit",
     "bundle": "tsdown",
     "watch": "tsdown --watch",
-    "prepare": "tsdown",
-    "test": "vitest run"
+    "test": "vitest run",
+    "release:pack": "node scripts/gestaltrun-release.mjs pack",
+    "release:publish": "node scripts/gestaltrun-release.mjs publish",
+    "prepublishOnly": "node scripts/gestaltrun-release.mjs guard",
+    "test:release": "node --test test-release/*.test.mjs"
   },
   "peerDependencies": {
-    "dsh-better-sidebar": "^0.11.0",
-    "cordis": "^4.0.0-rc.7",
+    "@deepseek-ai/cordis": "^4.0.2",
+    "@gestaltrun/dsh-better-sidebar": "0.19.1-gestaltrun.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
-  "peerDependenciesMeta": {
-    "dsh-better-sidebar": { "optional": true },
-    "cordis": { "optional": true }
+    "react-dom": "^18.2.0",
+    "@deepseek-ai/dsh-session": "0.1.5-rc.2",
+    "@deepseek-ai/dsh-session-persistence": "0.1.5-rc.2",
+    "@deepseek-ai/dsh-host-webserver": "0.1.5-rc.2",
+    "@deepseek-ai/dsh-web-app": "0.1.5-rc.2",
+    "@deepseek-ai/dsh-client-connection": "0.1.5-rc.2"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
     "@types/react": "~18.3.1",
     "@types/react-dom": "~18.3.1",
-    "cordis": "^4.0.0-rc.7",
     "lightningcss": "^1.32.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "tsdown": "^0.22.2",
     "typescript": "^5.6.0",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.8",
+    "@deepseek-ai/cordis": "4.0.2",
+    "@gestaltrun/dsh-better-sidebar": "0.19.1-gestaltrun.0",
+    "tsx": "^4.21.0",
+    "@deepseek-ai/dsh-session": "0.1.5-rc.2",
+    "@deepseek-ai/dsh-session-persistence": "0.1.5-rc.2",
+    "@deepseek-ai/dsh-host-webserver": "0.1.5-rc.2",
+    "@deepseek-ai/dsh-web-app": "0.1.5-rc.2",
+    "yaml": "2.8.2",
+    "@deepseek-ai/dsh-client-connection": "0.1.5-rc.2"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }
