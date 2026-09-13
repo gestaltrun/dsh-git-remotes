@@ -42,3 +42,19 @@ test('development branches verify while publication has no push trigger', () => 
   assert.equal(release.on.push, undefined);
   assert.equal(release.permissions['id-token'], 'write');
 });
+
+for (const filename of ['/Users/example/project/panel.css', 'C:/checkout/panel.css', 'C:\\checkout\\panel.css']) {
+  test(`rejects an absolute CSS virtual module identifier: ${filename}`, () => {
+    const root = mkdtempSync(join(tmpdir(), 'gestaltrun-css-negative-'));
+    try {
+      mkdirSync(join(root, 'package/lib'), { recursive: true });
+      writeFileSync(join(root, 'package/package.json'), JSON.stringify(pkg));
+      writeFileSync(join(root, 'package/lib/index.js'), 'export function apply() {}');
+      writeFileSync(join(root, 'package/LICENSE'), 'fixture');
+      writeFileSync(join(root, 'package/cordis.patch.yml'), `- insert:\n    - id: git-remotes\n      name: "${pkg.name}"\n`);
+      writeFileSync(join(root, 'package/lib/client.js'), `window.__ModuleLoader__.load({ id: "${pkg.name}" });\n//#region \\0dsh-css:${filename}.mjs\n`);
+      execFileSync('tar', ['-czf', join(root, 'absolute.tgz'), '-C', root, 'package']);
+      assert.throws(() => validateArchive(join(root, 'absolute.tgz')), /Absolute CSS module identifier/);
+    } finally { rmSync(root, { recursive: true, force: true }); }
+  });
+}

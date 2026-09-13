@@ -118,11 +118,11 @@ function makeCssPlugin(pluginId: string): BuildPlugin {
       } else {
         abs = resolvePath(REPOSITORY_ROOT, 'node_modules', source)
       }
-      return CSS_VIRTUAL_PREFIX + abs + CSS_VIRTUAL_SUFFIX
+      return CSS_VIRTUAL_PREFIX + relative(REPOSITORY_ROOT, abs).split(sep).join('/') + CSS_VIRTUAL_SUFFIX
     },
     async load(virtualId: string) {
       if (!virtualId.startsWith(CSS_VIRTUAL_PREFIX)) return null
-      const fileId = virtualId.slice(CSS_VIRTUAL_PREFIX.length, -CSS_VIRTUAL_SUFFIX.length)
+      const fileId = resolvePath(REPOSITORY_ROOT, virtualId.slice(CSS_VIRTUAL_PREFIX.length, -CSS_VIRTUAL_SUFFIX.length))
       this.addWatchFile(fileId)
       const source = await readFile(fileId)
       if (fileId.endsWith('.module.css')) {

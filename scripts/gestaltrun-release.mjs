@@ -52,6 +52,11 @@ export function validateArchive(path) {
   const patch = parse(execFileSync('tar', ['-xOf', path, 'package/cordis.patch.yml'], { encoding: 'utf8' }));
   if (!client.includes(`id: ${JSON.stringify(NAME)}`) || patch[0]?.insert?.[0]?.name !== NAME) throw new Error('Stale client or patch identity');
   if (client.includes('@deepseek-ai/dsh-client-runtime') || /require\(["']cordis["']\)/.test(client)) throw new Error('Retired client runtime or duplicate Cordis');
+  for (const entry of entries) {
+    if (!/^package\/lib\/client(?:-registry)?\.js$/.test(entry)) continue;
+    const code = execFileSync('tar', ['-xOf', path, entry], { encoding: 'utf8' });
+    if (/dsh-css:(?:[/\\]|[A-Za-z]:)/.test(code)) throw new Error('Absolute CSS module identifier in archive');
+  }
   return pkg;
 }
 function pnpm(args) {
