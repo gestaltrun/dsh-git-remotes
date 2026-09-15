@@ -47,7 +47,7 @@ function packedManifest(path) { return JSON.parse(execFileSync('tar', ['-xOf', p
 export function validateArchive(path) {
   const pkg = packedManifest(path);
   validatePackage(pkg);
-  const entries = new Set(tar(path, ['-tzf']).trim().split('\n'));
+  const entries = new Set(tar(path, ['-tzf']).split(/\r?\n/u).map(entry => entry.trim().replaceAll('\\', '/')).filter(entry => entry.length > 0));
   for (const name of ['lib/index.js', 'lib/client.js', 'cordis.patch.yml', 'LICENSE']) if (!entries.has(`package/${name}`)) throw new Error(`Missing archive entry: ${name}`);
   const client = execFileSync('tar', ['-xOf', path, 'package/lib/client.js'], { encoding: 'utf8' });
   const patch = parse(execFileSync('tar', ['-xOf', path, 'package/cordis.patch.yml'], { encoding: 'utf8' }));
