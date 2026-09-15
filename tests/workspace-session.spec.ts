@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { resolve } from 'node:path'
 import { workspaceRoot } from '../src/git.ts'
 import type { Context } from '../src/context-types.ts'
 
@@ -14,9 +15,11 @@ describe('session workspace selection', () => {
     await expect(Promise.resolve().then(() => workspaceRoot(context({}), 'missing'))).rejects.toThrow(/session/)
   })
   it('selects live and cold session workspaces independently', async () => {
-    const ctx = context({ first: '/tmp/project-a' }, { second: '/tmp/project-b' })
-    expect(await workspaceRoot(ctx, 'first')).toBe('/tmp/project-a')
-    expect(await workspaceRoot(ctx, 'second')).toBe('/tmp/project-b')
+    const first = resolve('/tmp/project-a')
+    const second = resolve('/tmp/project-b')
+    const ctx = context({ first }, { second })
+    expect(await workspaceRoot(ctx, 'first')).toBe(first)
+    expect(await workspaceRoot(ctx, 'second')).toBe(second)
   })
   it('rejects missing and relative workspaces', async () => {
     await expect(Promise.resolve().then(() => workspaceRoot(context({}), ''))).rejects.toThrow(/session/)
