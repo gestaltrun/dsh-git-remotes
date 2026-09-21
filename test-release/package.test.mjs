@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { parse } from 'yaml';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { validatePackage, validateArchive, assertPublishContext, REPOSITORY } from '../scripts/gestaltrun-release.mjs';
+import { validateSidebar, integrity, validatePackage, validateArchive, assertPublishContext, REPOSITORY } from '../scripts/gestaltrun-release.mjs';
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 test('rejects upstream identities, install hooks and retired host dependencies', () => {
   validatePackage(pkg);
@@ -58,3 +58,21 @@ for (const filename of ['/Users/example/project/panel.css', 'C:/checkout/panel.c
     } finally { rmSync(root, { recursive: true, force: true }); }
   });
 }
+
+
+test('candidate Sidebar requires exact producer bytes and the selected version', () => {
+  const root = mkdtempSync(join(tmpdir(), 'sidebar-candidate-'));
+  try {
+    mkdirSync(join(root, 'package'));
+    const file = join(root, 'package/package.json');
+    const archive = join(root, 'sidebar.tgz');
+    writeFileSync(file, JSON.stringify({ name: '@gestaltrun/dsh-better-sidebar', version: '0.19.1-gestaltrun.1' }));
+    execFileSync('tar', ['-czf', archive, '-C', root, 'package']);
+    validateSidebar(archive, integrity(archive));
+    assert.throws(() => validateSidebar(archive));
+    assert.throws(() => validateSidebar(archive, 'sha512-' + 'A'.repeat(86) + '=='));
+    writeFileSync(file, JSON.stringify({ name: '@gestaltrun/dsh-better-sidebar', version: '0.19.1-gestaltrun.0' }));
+    execFileSync('tar', ['-czf', archive, '-C', root, 'package']);
+    assert.throws(() => validateSidebar(archive, integrity(archive)));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
