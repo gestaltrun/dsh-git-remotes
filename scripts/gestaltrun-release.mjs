@@ -12,7 +12,7 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 export const NAME = '@gestaltrun/dsh-git-remotes';
 export const REPOSITORY = 'gestaltrun/dsh-git-remotes';
 const SIDEBAR = '@gestaltrun/dsh-better-sidebar';
-const SIDEBAR_VERSION = '0.19.1-gestaltrun.0';
+const SIDEBAR_VERSION = '0.19.1-gestaltrun.1';
 
 /** Refuse an upstream identity, a local dependency, or install-time build. */
 export function validatePackage(pkg) {
@@ -66,12 +66,12 @@ function pnpm(args) {
   execFileSync(process.execPath, [cli, ...args], { cwd: ROOT, stdio: 'inherit' });
 }
 
-/** The optional supplied Sidebar is already published: require its exact locked bytes before the frozen install. */
-export function validateSidebar(path) {
+/** Bind a local candidate to the producer's explicit byte identity; this is not a registry publication claim. */
+export function validateSidebar(path, expectedIntegrity) {
   const pkg = packedManifest(path);
-  const lock = parse(readFileSync(join(ROOT, 'pnpm-lock.yaml'), 'utf8'));
-  const expected = lock.packages?.[`${SIDEBAR}@${SIDEBAR_VERSION}`]?.resolution?.integrity;
-  if (pkg.name !== SIDEBAR || pkg.version !== SIDEBAR_VERSION || expected !== integrity(path)) throw new Error('Sidebar archive differs from the locked published artifact');
+  if (pkg.name !== SIDEBAR || pkg.version !== SIDEBAR_VERSION
+    || typeof expectedIntegrity !== 'string' || !/^sha512-[A-Za-z0-9+/]{86}==$/.test(expectedIntegrity)
+    || expectedIntegrity !== integrity(path)) throw new Error('Sidebar candidate identity or integrity differs from the producer');
 }
 
 function main() {
@@ -80,10 +80,16 @@ function main() {
   validatePackage(pkg);
   if (command === 'guard') return assertPublishContext(pkg, process.env);
   if (!['pack', 'publish'].includes(command)) throw new Error('Expected pack, publish, or guard');
-  const { values } = parseArgs({ args: args.filter(arg => arg !== '--'), options: { out: { type: 'string' }, 'sidebar-tarball': { type: 'string' } } });
+  const { values } = parseArgs({ args: args.filter(arg => arg !== '--'), options: { out: { type: 'string' }, 'sidebar-tarball': { type: 'string' }, 'sidebar-integrity': { type: 'string' } } });
   if (!values.out || !isAbsolute(values.out)) throw new Error('Usage: release:pack -- --out <absolute-directory> [--sidebar-tarball <archive>]');
   if (command === 'publish') assertPublishContext(pkg, process.env);
-  if (values['sidebar-tarball']) validateSidebar(resolve(values['sidebar-tarball']));
+  if (Boolean(values['sidebar-tarball']) !== Boolean(values['sidebar-integrity'])) throw new Error('Supply both --sidebar-tarball and --sidebar-integrity');
+  if (command === 'publish' && !values['sidebar-tarball']) throw new Error('Publishing requires the verified Sidebar candidate');
+  if (values['sidebar-tarball']) {
+    validateSidebar(resolve(values['sidebar-tarball']), values['sidebar-integrity']);
+    const workspace = parse(readFileSync(join(ROOT, 'pnpm-workspace.yaml'), 'utf8'));
+    if (workspace.overrides?.[SIDEBAR] !== `file:${resolve(values['sidebar-tarball'])}`) throw new Error('Install the verified Sidebar candidate through an explicit workspace override before packing');
+  } else console.log('Registry development baseline build; this does not verify the Sidebar candidate combination');
   const out = resolve(values.out);
   const filename = `${NAME.slice(1).replace('/', '-')}-${pkg.version}.tgz`;
   const archive = join(out, filename);

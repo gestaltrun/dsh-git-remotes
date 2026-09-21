@@ -58,3 +58,5 @@ pnpm build
 ## 许可
 
 BSD-3-Clause（与官方 plugin-template 相同）。
+
+候选发布构建使用 `release:pack -- --out <目录> --sidebar-tarball <归档> --sidebar-integrity <sha512>`，输入必须是 Better Sidebar 0.19.1-gestaltrun.1 的同一归档。调用方先在独立构建目录将 pnpm 的 Sidebar override 指向该文件并安装；校验会拒绝版本或摘要不符。已发布的开发依赖仅用于基线检查，不能代替候选组合验证。生成包的 peer 依赖固定为 .1，不包含本地文件引用。
