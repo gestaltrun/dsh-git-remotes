@@ -83,10 +83,13 @@ function main() {
   const { values } = parseArgs({ args: args.filter(arg => arg !== '--'), options: { out: { type: 'string' }, 'sidebar-tarball': { type: 'string' }, 'sidebar-integrity': { type: 'string' } } });
   if (!values.out || !isAbsolute(values.out)) throw new Error('Usage: release:pack -- --out <absolute-directory> [--sidebar-tarball <archive>]');
   if (command === 'publish') assertPublishContext(pkg, process.env);
-  if (!values['sidebar-tarball']) throw new Error('The unpublished Sidebar cohort requires --sidebar-tarball and --sidebar-integrity');
-  validateSidebar(resolve(values['sidebar-tarball']), values['sidebar-integrity']);
-  const workspace = parse(readFileSync(join(ROOT, 'pnpm-workspace.yaml'), 'utf8'));
-  if (workspace.overrides?.[SIDEBAR] !== `file:${resolve(values['sidebar-tarball'])}`) throw new Error('Install the verified Sidebar candidate through an explicit workspace override before packing');
+  if (Boolean(values['sidebar-tarball']) !== Boolean(values['sidebar-integrity'])) throw new Error('Supply both --sidebar-tarball and --sidebar-integrity');
+  if (command === 'publish' && !values['sidebar-tarball']) throw new Error('Publishing requires the verified Sidebar candidate');
+  if (values['sidebar-tarball']) {
+    validateSidebar(resolve(values['sidebar-tarball']), values['sidebar-integrity']);
+    const workspace = parse(readFileSync(join(ROOT, 'pnpm-workspace.yaml'), 'utf8'));
+    if (workspace.overrides?.[SIDEBAR] !== `file:${resolve(values['sidebar-tarball'])}`) throw new Error('Install the verified Sidebar candidate through an explicit workspace override before packing');
+  } else console.log('Registry development baseline build; this does not verify the Sidebar candidate combination');
   const out = resolve(values.out);
   const filename = `${NAME.slice(1).replace('/', '-')}-${pkg.version}.tgz`;
   const archive = join(out, filename);
