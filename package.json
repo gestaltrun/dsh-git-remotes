@@ -1,6 +1,6 @@
 {
   "name": "@gestaltrun/dsh-git-remotes",
-  "version": "0.1.0-gestaltrun.0",
+  "version": "0.1.0-gestaltrun.1",
   "description": "DSH web plugin: better-sidebar Git Remotes tab for fetch / ff-only pull / confirmed push. Does not replace the built-in Git stage/commit tab.",
   "type": "module",
   "license": "BSD-3-Clause",
